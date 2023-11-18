@@ -1,0 +1,44 @@
+diff -Naur mtd-utils-1.5.2.orig/mkfs.jffs2.c mtd-utils-1.5.2/mkfs.jffs2.c
+--- mtd-utils-1.5.2.orig/mkfs.jffs2.c	2016-01-25 16:20:47.000000000 +0800
++++ mtd-utils-1.5.2/mkfs.jffs2.c	2023-11-18 23:45:16.186634803 +0800
+@@ -49,6 +49,7 @@
+ 
+ #define PROGRAM_NAME "mkfs.jffs2"
+ 
++#include <sys/sysmacros.h>
+ #include <sys/types.h>
+ #include <stdio.h>
+ #include <sys/stat.h>
+diff -Naur mtd-utils-1.5.2.orig/mkfs.ubifs/devtable.c mtd-utils-1.5.2/mkfs.ubifs/devtable.c
+--- mtd-utils-1.5.2.orig/mkfs.ubifs/devtable.c	2016-01-25 16:20:47.000000000 +0800
++++ mtd-utils-1.5.2/mkfs.ubifs/devtable.c	2023-11-18 23:45:48.997692402 +0800
+@@ -44,6 +44,7 @@
+  * for more information about what the device table is.
+  */
+ 
++#include <sys/sysmacros.h>
+ #include "mkfs.ubifs.h"
+ #include "hashtable/hashtable.h"
+ #include "hashtable/hashtable_itr.h"
+diff -Naur mtd-utils-1.5.2.orig/mkfs.ubifs/mkfs.ubifs.c mtd-utils-1.5.2/mkfs.ubifs/mkfs.ubifs.c
+--- mtd-utils-1.5.2.orig/mkfs.ubifs/mkfs.ubifs.c	2016-01-25 16:20:47.000000000 +0800
++++ mtd-utils-1.5.2/mkfs.ubifs/mkfs.ubifs.c	2023-11-18 23:45:59.906586574 +0800
+@@ -22,6 +22,7 @@
+ 
+ #define _XOPEN_SOURCE 500 /* For realpath() */
+ 
++#include <sys/sysmacros.h>
+ #include "mkfs.ubifs.h"
+ #include <crc32.h>
+ #include "common.h"
+diff -Naur mtd-utils-1.5.2.orig/ubi-utils/libubi.c mtd-utils-1.5.2/ubi-utils/libubi.c
+--- mtd-utils-1.5.2.orig/ubi-utils/libubi.c	2016-01-25 16:20:47.000000000 +0800
++++ mtd-utils-1.5.2/ubi-utils/libubi.c	2023-11-18 23:45:34.600421003 +0800
+@@ -22,6 +22,7 @@
+ 
+ #define PROGRAM_NAME "libubi"
+ 
++#include <sys/sysmacros.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>

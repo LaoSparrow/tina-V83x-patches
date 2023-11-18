@@ -1,0 +1,22 @@
+diff -Naur squashfs4.3.orig/squashfs-tools/mksquashfs.c squashfs4.3/squashfs-tools/mksquashfs.c
+--- squashfs4.3.orig/squashfs-tools/mksquashfs.c	2014-05-13 06:18:20.000000000 +0800
++++ squashfs4.3/squashfs-tools/mksquashfs.c	2023-11-19 00:06:38.852481477 +0800
+@@ -27,6 +27,7 @@
+ #define TRUE 1
+ #define MAX_LINE 16384
+ 
++#include <sys/sysmacros.h>
+ #include <pwd.h>
+ #include <grp.h>
+ #include <time.h>
+diff -Naur squashfs4.3.orig/squashfs-tools/unsquashfs.c squashfs4.3/squashfs-tools/unsquashfs.c
+--- squashfs4.3.orig/squashfs-tools/unsquashfs.c	2014-05-13 06:18:35.000000000 +0800
++++ squashfs4.3/squashfs-tools/unsquashfs.c	2023-11-19 00:06:36.284508221 +0800
+@@ -23,6 +23,7 @@
+  * unsquashfs.c
+  */
+ 
++#include <sys/sysmacros.h>
+ #include "unsquashfs.h"
+ #include "squashfs_swap.h"
+ #include "squashfs_compat.h"

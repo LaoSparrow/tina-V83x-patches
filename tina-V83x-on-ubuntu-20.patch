@@ -1,0 +1,232 @@
+diff --git a/tools/bison/patches/Bison-3.0.4_glibc_2.28.patch b/tools/bison/patches/Bison-3.0.4_glibc_2.28.patch
+new file mode 100644
+index 00000000..4d77218a
+--- /dev/null
++++ b/tools/bison/patches/Bison-3.0.4_glibc_2.28.patch
+@@ -0,0 +1,31 @@
++patch to avoud glibc 2.28 problems
++
++diff -ru bison-3.0.4_orig/lib/fseterr.c bison-3.0.4/lib/fseterr.c
++--- bison-3.0.4_orig/lib/fseterr.c	2019-06-19 15:56:23.552533933 -0400
+++++ bison-3.0.4/lib/fseterr.c	2019-06-19 15:58:32.757469045 -0400
++@@ -29,7 +29,7 @@
++   /* Most systems provide FILE as a struct and the necessary bitmask in
++      <stdio.h>, because they need it for implementing getc() and putc() as
++      fast macros.  */
++-#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+++#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
++   fp->_flags |= _IO_ERR_SEEN;
++ #elif defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, Mac OS X, Cygwin */
++   fp_->_flags |= __SERR;
++diff -ru bison-3.0.4_orig/lib/stdio-impl.h bison-3.0.4/lib/stdio-impl.h
++--- bison-3.0.4_orig/lib/stdio-impl.h	2019-06-19 15:56:23.556533962 -0400
+++++ bison-3.0.4/lib/stdio-impl.h	2019-06-19 15:57:44.497120445 -0400
++@@ -19,6 +19,13 @@
++    have different naming conventions, or their access requires some casts.  */
++ 
++ 
+++/* Glibc 2.28 made _IO_IN_BACKUP private.  For now, work around this
+++   problem by defining it ourselves.  FIXME: Do not rely on glibc
+++   internals.  */
+++#if !defined _IO_IN_BACKUP && defined _IO_EOF_SEEN
+++# define _IO_IN_BACKUP 0x100
+++#endif
+++
++ /* BSD stdio derived implementations.  */
++ 
++ #if defined __NetBSD__                         /* NetBSD */
+diff --git a/tools/findutils/patches/findutils-4.4.2-gnulib-musl.patch b/tools/findutils/patches/findutils-4.4.2-gnulib-musl.patch
+new file mode 100644
+index 00000000..0a47c907
+--- /dev/null
++++ b/tools/findutils/patches/findutils-4.4.2-gnulib-musl.patch
+@@ -0,0 +1,18 @@
++diff -Naur findutils-4.4.2.orig/gnulib/lib/freadahead.c findutils-4.4.2/gnulib/lib/freadahead.c
++--- findutils-4.4.2.orig/gnulib/lib/freadahead.c	2009-05-10 21:23:57.000000000 +0000
+++++ findutils-4.4.2/gnulib/lib/freadahead.c	2013-07-06 01:54:25.443043832 +0000
++@@ -22,6 +22,7 @@
++ size_t
++ freadahead (FILE *fp)
++ {
+++#if 0
++ #if defined _IO_ferror_unlocked     /* GNU libc, BeOS */
++   if (fp->_IO_write_ptr > fp->_IO_write_base)
++     return 0;
++@@ -63,4 +64,6 @@
++ #else
++  #error "Please port gnulib freadahead.c to your platform! Look at the definition of fflush, fread on your system, then report this to bug-gnulib."
++ #endif
+++#endif
+++  return 0;
++ }
+diff --git a/tools/m4/patches/M4-1.4.17_glibc_2.28.patch b/tools/m4/patches/M4-1.4.17_glibc_2.28.patch
+new file mode 100644
+index 00000000..3a0ea51c
+--- /dev/null
++++ b/tools/m4/patches/M4-1.4.17_glibc_2.28.patch
+@@ -0,0 +1,54 @@
++fix problems occuring from changes in glibc 2.28
++https://github.com/coreutils/gnulib/commit/4af4a4a71827c0bc5e0ec67af23edef4f15cee8e
++
++diff -ru m4-1.4.17.orig/lib/freadahead.c m4-1.4.17/lib/freadahead.c
++--- m4-1.4.17.orig/lib/freadahead.c	2019-06-19 15:21:26.897812071 -0400
+++++ m4-1.4.17/lib/freadahead.c	2019-06-19 15:25:40.075547063 -0400
++@@ -25,7 +25,7 @@
++ size_t
++ freadahead (FILE *fp)
++ {
++-#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+++#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
++   if (fp->_IO_write_ptr > fp->_IO_write_base)
++     return 0;
++   return (fp->_IO_read_end - fp->_IO_read_ptr)
++diff -ru m4-1.4.17.orig/lib/fseeko.c m4-1.4.17/lib/fseeko.c
++--- m4-1.4.17.orig/lib/fseeko.c	2019-06-19 15:21:26.897812071 -0400
+++++ m4-1.4.17/lib/fseeko.c	2019-06-19 15:27:19.368232257 -0400
++@@ -47,7 +47,7 @@
++ #endif
++ 
++   /* These tests are based on fpurge.c.  */
++-#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+++#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
++   if (fp->_IO_read_end == fp->_IO_read_ptr
++       && fp->_IO_write_ptr == fp->_IO_write_base
++       && fp->_IO_save_base == NULL)
++@@ -121,7 +121,7 @@
++           return -1;
++         }
++ 
++-#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+++#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
++       fp->_flags &= ~_IO_EOF_SEEN;
++       fp->_offset = pos;
++ #elif defined __sferror || defined __DragonFly__ /* FreeBSD, NetBSD, OpenBSD, DragonFly, Mac OS X, Cygwin */
++diff -ru m4-1.4.17.orig/lib/stdio-impl.h m4-1.4.17/lib/stdio-impl.h
++--- m4-1.4.17.orig/lib/stdio-impl.h	2019-06-19 15:21:26.909812152 -0400
+++++ m4-1.4.17/lib/stdio-impl.h	2019-06-19 15:29:10.789003521 -0400
++@@ -21,6 +21,14 @@
++ 
++ /* BSD stdio derived implementations.  */
++ 
+++/* Glibc 2.28 made _IO_IN_BACKUP private.  For now, work around this
+++   problem by defining it ourselves.  FIXME: Do not rely on glibc
+++   internals.  */
+++
+++#if !defined _IO_IN_BACKUP && defined _IO_EOF_SEEN
+++# define _IO_IN_BACKUP 0x100
+++#endif
+++
++ #if defined __NetBSD__                         /* NetBSD */
++ /* Get __NetBSD_Version__.  */
++ # include <sys/param.h>
+diff --git a/tools/make-ext4fs/patches/make-ext4fs-sysmacros.patch b/tools/make-ext4fs/patches/make-ext4fs-sysmacros.patch
+new file mode 100644
+index 00000000..fc5902f5
+--- /dev/null
++++ b/tools/make-ext4fs/patches/make-ext4fs-sysmacros.patch
+@@ -0,0 +1,11 @@
++diff -Naur make-ext4fs-2015-12-02.orig/contents.c make-ext4fs-2015-12-02/contents.c
++--- make-ext4fs-2015-12-02.orig/contents.c	2015-12-03 00:07:51.000000000 +0800
+++++ make-ext4fs-2015-12-02/contents.c	2023-11-18 23:28:26.488119072 +0800
++@@ -14,6 +14,7 @@
++  * limitations under the License.
++  */
++ 
+++#include <sys/sysmacros.h>
++ #include <sys/stat.h>
++ #include <string.h>
++ #include <stdio.h>
+diff --git a/tools/mkimage/patches/060-remove_kernel_includes.patch b/tools/mkimage/patches/060-remove_kernel_includes.patch
+index e61d8cc4..0d69b992 100644
+--- a/tools/mkimage/patches/060-remove_kernel_includes.patch
++++ b/tools/mkimage/patches/060-remove_kernel_includes.patch
+@@ -1,10 +1,9 @@
+ --- a/include/compiler.h
+ +++ b/include/compiler.h
+-@@ -66,6 +66,11 @@ typedef uint8_t __u8;
++@@ -66,6 +66,10 @@ typedef uint8_t __u8;
+  typedef uint16_t __u16;
+  typedef uint32_t __u32;
+  typedef unsigned int uint;
+-+typedef uint64_t __u64;
+ +#ifndef linux
+ +typedef int __kernel_daddr_t;
+ +typedef unsigned int __kernel_ino_t;
+diff --git a/tools/mtd-utils/patches/mtd-utils-sysmacros.patch b/tools/mtd-utils/patches/mtd-utils-sysmacros.patch
+new file mode 100644
+index 00000000..fd0253ce
+--- /dev/null
++++ b/tools/mtd-utils/patches/mtd-utils-sysmacros.patch
+@@ -0,0 +1,44 @@
++diff -Naur mtd-utils-1.5.2.orig/mkfs.jffs2.c mtd-utils-1.5.2/mkfs.jffs2.c
++--- mtd-utils-1.5.2.orig/mkfs.jffs2.c	2016-01-25 16:20:47.000000000 +0800
+++++ mtd-utils-1.5.2/mkfs.jffs2.c	2023-11-18 23:45:16.186634803 +0800
++@@ -49,6 +49,7 @@
++ 
++ #define PROGRAM_NAME "mkfs.jffs2"
++ 
+++#include <sys/sysmacros.h>
++ #include <sys/types.h>
++ #include <stdio.h>
++ #include <sys/stat.h>
++diff -Naur mtd-utils-1.5.2.orig/mkfs.ubifs/devtable.c mtd-utils-1.5.2/mkfs.ubifs/devtable.c
++--- mtd-utils-1.5.2.orig/mkfs.ubifs/devtable.c	2016-01-25 16:20:47.000000000 +0800
+++++ mtd-utils-1.5.2/mkfs.ubifs/devtable.c	2023-11-18 23:45:48.997692402 +0800
++@@ -44,6 +44,7 @@
++  * for more information about what the device table is.
++  */
++ 
+++#include <sys/sysmacros.h>
++ #include "mkfs.ubifs.h"
++ #include "hashtable/hashtable.h"
++ #include "hashtable/hashtable_itr.h"
++diff -Naur mtd-utils-1.5.2.orig/mkfs.ubifs/mkfs.ubifs.c mtd-utils-1.5.2/mkfs.ubifs/mkfs.ubifs.c
++--- mtd-utils-1.5.2.orig/mkfs.ubifs/mkfs.ubifs.c	2016-01-25 16:20:47.000000000 +0800
+++++ mtd-utils-1.5.2/mkfs.ubifs/mkfs.ubifs.c	2023-11-18 23:45:59.906586574 +0800
++@@ -22,6 +22,7 @@
++ 
++ #define _XOPEN_SOURCE 500 /* For realpath() */
++ 
+++#include <sys/sysmacros.h>
++ #include "mkfs.ubifs.h"
++ #include <crc32.h>
++ #include "common.h"
++diff -Naur mtd-utils-1.5.2.orig/ubi-utils/libubi.c mtd-utils-1.5.2/ubi-utils/libubi.c
++--- mtd-utils-1.5.2.orig/ubi-utils/libubi.c	2016-01-25 16:20:47.000000000 +0800
+++++ mtd-utils-1.5.2/ubi-utils/libubi.c	2023-11-18 23:45:34.600421003 +0800
++@@ -22,6 +22,7 @@
++ 
++ #define PROGRAM_NAME "libubi"
++ 
+++#include <sys/sysmacros.h>
++ #include <stdlib.h>
++ #include <stdio.h>
++ #include <string.h>
+diff --git a/tools/squashfs4/patches/squashfs-sysmacros.patch b/tools/squashfs4/patches/squashfs-sysmacros.patch
+new file mode 100644
+index 00000000..4767fc33
+--- /dev/null
++++ b/tools/squashfs4/patches/squashfs-sysmacros.patch
+@@ -0,0 +1,22 @@
++diff -Naur squashfs4.3.orig/squashfs-tools/mksquashfs.c squashfs4.3/squashfs-tools/mksquashfs.c
++--- squashfs4.3.orig/squashfs-tools/mksquashfs.c	2014-05-13 06:18:20.000000000 +0800
+++++ squashfs4.3/squashfs-tools/mksquashfs.c	2023-11-19 00:06:38.852481477 +0800
++@@ -27,6 +27,7 @@
++ #define TRUE 1
++ #define MAX_LINE 16384
++ 
+++#include <sys/sysmacros.h>
++ #include <pwd.h>
++ #include <grp.h>
++ #include <time.h>
++diff -Naur squashfs4.3.orig/squashfs-tools/unsquashfs.c squashfs4.3/squashfs-tools/unsquashfs.c
++--- squashfs4.3.orig/squashfs-tools/unsquashfs.c	2014-05-13 06:18:35.000000000 +0800
+++++ squashfs4.3/squashfs-tools/unsquashfs.c	2023-11-19 00:06:36.284508221 +0800
++@@ -23,6 +23,7 @@
++  * unsquashfs.c
++  */
++ 
+++#include <sys/sysmacros.h>
++ #include "unsquashfs.h"
++ #include "squashfs_swap.h"
++ #include "squashfs_compat.h"

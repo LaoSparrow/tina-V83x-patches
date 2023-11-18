@@ -1,0 +1,11 @@
+diff -Naur make-ext4fs-2015-12-02.orig/contents.c make-ext4fs-2015-12-02/contents.c
+--- make-ext4fs-2015-12-02.orig/contents.c	2015-12-03 00:07:51.000000000 +0800
++++ make-ext4fs-2015-12-02/contents.c	2023-11-18 23:28:26.488119072 +0800
+@@ -14,6 +14,7 @@
+  * limitations under the License.
+  */
+ 
++#include <sys/sysmacros.h>
+ #include <sys/stat.h>
+ #include <string.h>
+ #include <stdio.h>
